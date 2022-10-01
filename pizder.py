@@ -51,9 +51,9 @@ class Car(object):
         blob.position = pos + (0, -12.5)
         self.motors = self.create_joints(wheel1, wheel2, blob, space)
         
-    def speedup(self):
+    def steer(self, direction):
         rate = self.motors[0]._get_rate()
-        rate += 0.3
+        rate += direction * 0.5
         self.motors[0]._set_rate(rate)
         self.motors[1]._set_rate(rate)
 
@@ -95,7 +95,7 @@ def main():
     draw_options = pymunk.pygame_util.DrawOptions(screen)
     pymunk.pygame_util.positive_y_is_up = False
 
-    floor = pymunk.Segment(space.static_body, (-100, 500), (400, 420), 5)
+    floor = pymunk.Segment(space.static_body, (-150, 500), (400, 420), 5)
     floor.friction = 1.0
     space.add(floor)
 
@@ -122,8 +122,10 @@ def main():
         space.step(1.0 / fps)
         
         keys = pygame.key.get_pressed() 
-        if keys[pygame.K_UP]:     
-            carar1.speedup()     
+        if keys[pygame.K_RIGHT]:
+            carar1.steer(1)
+        if keys[pygame.K_LEFT]:
+            carar1.steer(-1)
 
         screen.fill(pygame.Color("white"))
 
