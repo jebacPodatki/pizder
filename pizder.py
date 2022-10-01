@@ -50,12 +50,21 @@ class Car(object):
         blob = self.create_blob(space)
         blob.position = pos + (0, -12.5)
         self.motors = self.create_joints(wheel1, wheel2, blob, space)
+        self.back_wheel = wheel1
+        self.front_wheel = wheel2
         
     def steer(self, direction):
         rate = self.motors[0]._get_rate()
-        rate += direction * 0.5
+        rate += direction * 3
         self.motors[0]._set_rate(rate)
         self.motors[1]._set_rate(rate)
+
+    def update(self):
+        self.motors[0]._set_rate(self.motors[0]._get_rate() * 0.98)
+        self.motors[1]._set_rate(self.motors[1]._get_rate() * 0.98)
+
+    def updown(self, direction):
+        self.front_wheel.apply_impulse_at_local_point((0.0, direction * -1000.0))
 
 def create_poly(space, points, mass=5.0, pos=(0, 0)):
     moment = pymunk.moment_for_poly(mass, points)
@@ -103,6 +112,14 @@ def main():
     floor2.friction = 1.0
     space.add(floor2)
 
+    floor3 = pymunk.Segment(space.static_body, (0, 500), (0, 100), 5)
+    floor3.friction = 1.0
+    space.add(floor3)
+
+    floor4 = pymunk.Segment(space.static_body, (1200, 500), (1200, 100), 5)
+    floor4.friction = 1.0
+    space.add(floor4)
+
     h = 400
     for y in range(1, h):
         x = 0
@@ -110,6 +127,8 @@ def main():
         p = Vec2d(450, -1800) + Vec2d(y / 20 * s * 2, y % 20 * s * 2)
         create_box(space, p, size=s, mass=1)
     create_wall_segments(space, [(430, 500), (440, 650), (660, 650), (670, 500)])
+
+    create_wall_segments(space, [(900, 460), (940, 450), (955, 430)])
 
     pos09 = Vec2d(100, 200)
     carar1 = Car(space, pos09 )
@@ -126,6 +145,12 @@ def main():
             carar1.steer(1)
         if keys[pygame.K_LEFT]:
             carar1.steer(-1)
+        if keys[pygame.K_UP]:
+            carar1.updown(1)
+        if keys[pygame.K_DOWN]:
+            carar1.updown(-1)
+
+        carar1.update()
 
         screen.fill(pygame.Color("white"))
 
